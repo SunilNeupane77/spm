@@ -17,6 +17,7 @@ export const metadata = {
 };
 
 import Header from '@/components/header';
+import { Toaster } from '@/components/ui/use-toast';
 import { Providers } from './providers';
 
 export default function RootLayout({ children }) {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
               {children}
             </main>
           </div>
+          <Toaster />
         </Providers>
       </body>
     </html>

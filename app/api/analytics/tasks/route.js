@@ -171,10 +171,9 @@ export async function GET(request) {
         priority: priorityDistribution
       },
       tasksByCourse: Object.values(tasksByCourse),
-      timeSeriesData: {
-        monthly: monthlyCompletionData,
-        daily: dailyData
-      }
+      timeSeriesData: Array.isArray(period === 'month' ? monthlyCompletionData : dailyData) 
+        ? (period === 'month' ? monthlyCompletionData : dailyData)
+        : []
     });
   } catch (error) {
     console.error('Failed to fetch task analytics:', error);

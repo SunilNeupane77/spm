@@ -7,11 +7,11 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -65,6 +65,7 @@ export default function Header() {
     { name: 'Courses', href: '/courses' },
     { name: 'Resources', href: '/resources' },
     { name: 'Mind Maps', href: '/mindmaps' },
+    { name: 'Analytics', href: '/analytics' },
   ];
 
   return (

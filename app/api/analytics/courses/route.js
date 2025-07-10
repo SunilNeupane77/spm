@@ -79,7 +79,8 @@ export async function GET(request) {
       };
     });
     
-    return NextResponse.json(courseStats);
+    // Ensure we always return an array, even if courseStats is falsy
+    return NextResponse.json(Array.isArray(courseStats) ? courseStats : []);
   } catch (error) {
     console.error('Failed to fetch course analytics:', error);
     return NextResponse.json({ error: 'Failed to fetch course analytics' }, { status: 500 });

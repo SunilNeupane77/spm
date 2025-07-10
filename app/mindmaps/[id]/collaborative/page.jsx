@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { useRealtimeCollaboration } from '@/lib/realtimeCollaboration';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save, Share2, Trash2, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -16,6 +17,7 @@ import ReactFlow, {
     Background,
     Controls,
     MiniMap,
+    Panel,
     addEdge,
     applyEdgeChanges,
     applyNodeChanges
@@ -25,7 +27,7 @@ import 'reactflow/dist/style.css';
 // Custom node types
 const nodeTypes = {};
 
-export default function MindmapDetail({ params }) {
+export default function CollaborativeMindmapPage({ params }) {
   const unwrappedParams = use(params);
   const mindmapId = unwrappedParams.id;
   const router = useRouter();
@@ -41,6 +43,101 @@ export default function MindmapDetail({ params }) {
   const [shareEmail, setShareEmail] = useState('');
   const [sharePermission, setSharePermission] = useState('view');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userId, setUserId] = useState(null);
+  
+  // Fetch user info
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user) {
+            setUserId(data.user.id);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user info:', error);
+      }
+    };
+    
+    fetchUserInfo();
+  }, []);
+  
+  // Real-time collaboration
+  const {
+    connected,
+    activeUsers,
+    error: collabError,
+    addNode: addNodeRealtime,
+    updateNode: updateNodeRealtime,
+    deleteNode: deleteNodeRealtime,
+    addEdge: addEdgeRealtime,
+    updateEdge: updateEdgeRealtime,
+    deleteEdge: deleteEdgeRealtime,
+    subscribeToChanges,
+  } = useRealtimeCollaboration(mindmapId, userId);
+  
+  // Subscribe to real-time collaboration events
+  useEffect(() => {
+    if (!userId) return;
+    
+    const unsubscribe = subscribeToChanges({
+      onNodeAdded: (node) => {
+        setNodes((nodes) => [...nodes, node]);
+        toast({ title: 'Node added by collaborator', duration: 2000 });
+      },
+      onNodeUpdated: (nodeId, updates) => {
+        setNodes((nodes) => 
+          nodes.map((node) => 
+            node.id === nodeId ? { ...node, ...updates } : node
+          )
+        );
+      },
+      onNodeDeleted: (nodeId) => {
+        setNodes((nodes) => nodes.filter((node) => node.id !== nodeId));
+        toast({ title: 'Node deleted by collaborator', duration: 2000 });
+      },
+      onEdgeAdded: (edge) => {
+        setEdges((edges) => [...edges, edge]);
+      },
+      onEdgeUpdated: (edgeId, updates) => {
+        setEdges((edges) => 
+          edges.map((edge) => 
+            edge.id === edgeId ? { ...edge, ...updates } : edge
+          )
+        );
+      },
+      onEdgeDeleted: (edgeId) => {
+        setEdges((edges) => edges.filter((edge) => edge.id !== edgeId));
+      },
+    });
+    
+    return unsubscribe;
+  }, [userId, subscribeToChanges, toast]);
+  
+  // Show connection status
+  useEffect(() => {
+    if (connected) {
+      toast({ 
+        title: 'Connected to collaboration server', 
+        description: 'You can now collaborate in real-time',
+        duration: 3000 
+      });
+    }
+  }, [connected, toast]);
+  
+  // Show error if connection fails
+  useEffect(() => {
+    if (collabError) {
+      toast({ 
+        title: 'Collaboration error', 
+        description: collabError,
+        variant: 'destructive',
+        duration: 5000 
+      });
+    }
+  }, [collabError, toast]);
   
   // Fetch mindmap data
   const { data: mindmap, isLoading, error } = useQuery({
@@ -197,24 +294,45 @@ export default function MindmapDetail({ params }) {
     });
   };
   
-  // Handle node changes
+  // Handle node changes with real-time sync
   const onNodesChange = useCallback((changes) => {
+    changes.forEach(change => {
+      if (change.type === 'add' && change.item) {
+        addNodeRealtime(change.item);
+      } else if (change.type === 'remove' && change.id) {
+        deleteNodeRealtime(change.id);
+      } else if (change.type === 'position' && change.id && change.position) {
+        updateNodeRealtime(change.id, { position: change.position });
+      }
+    });
+    
     setNodes((nds) => applyNodeChanges(changes, nds));
-  }, []);
+  }, [addNodeRealtime, updateNodeRealtime, deleteNodeRealtime]);
   
-  // Handle edge changes
+  // Handle edge changes with real-time sync
   const onEdgesChange = useCallback((changes) => {
+    changes.forEach(change => {
+      if (change.type === 'remove' && change.id) {
+        deleteEdgeRealtime(change.id);
+      }
+    });
+    
     setEdges((eds) => applyEdgeChanges(changes, eds));
-  }, []);
+  }, [deleteEdgeRealtime]);
   
-  // Handle connections
+  // Handle connections with real-time sync
   const onConnect = useCallback((connection) => {
+    const newEdge = {
+      ...connection,
+      id: `edge-${connection.source}-${connection.target}`,
+    };
+    addEdgeRealtime(newEdge);
     setEdges((eds) => addEdge(connection, eds));
-  }, []);
+  }, [addEdgeRealtime]);
   
-  // Handle adding a new node
+  // Add new node with real-time sync
   const addNode = () => {
-    const newId = (nodes.length + 1).toString();
+    const newId = `node-${Date.now()}`;
     const newNode = {
       id: newId,
       type: 'default',
@@ -225,9 +343,10 @@ export default function MindmapDetail({ params }) {
       },
     };
     
+    addNodeRealtime(newNode);
     setNodes((nds) => [...nds, newNode]);
   };
-  
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[600px]">
@@ -266,6 +385,13 @@ export default function MindmapDetail({ params }) {
         </div>
         
         <div className="flex items-center space-x-2">
+          {/* Collaborators Panel */}
+          <Button variant="outline" size="sm" className="flex items-center">
+            <Users className="h-4 w-4 mr-2" />
+            {activeUsers?.length || 0} {activeUsers?.length === 1 ? 'User' : 'Users'}
+            {connected && <span className="h-2 w-2 bg-green-500 rounded-full ml-2"></span>}
+          </Button>
+          
           <Button variant="outline" onClick={addNode}>
             Add Node
           </Button>
@@ -276,10 +402,6 @@ export default function MindmapDetail({ params }) {
           <Button variant="outline" onClick={() => setIsShareDialogOpen(true)}>
             <Share2 className="h-4 w-4 mr-2" />
             Share
-          </Button>
-          <Button variant="outline" onClick={() => router.push(`/mindmaps/${mindmapId}/collaborative`)}>
-            <Users className="h-4 w-4 mr-2" />
-            Collaborate
           </Button>
           <Button variant="outline" onClick={() => setIsDeleteDialogOpen(true)}>
             <Trash2 className="h-4 w-4 mr-2" />
@@ -302,6 +424,19 @@ export default function MindmapDetail({ params }) {
           <Background />
           <Controls />
           <MiniMap />
+          <Panel position="bottom-left">
+            {connected ? (
+              <Badge variant="outline" className="bg-green-100">
+                <span className="h-2 w-2 bg-green-500 rounded-full mr-2"></span>
+                Connected
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="bg-red-100">
+                <span className="h-2 w-2 bg-red-500 rounded-full mr-2"></span>
+                Disconnected
+              </Badge>
+            )}
+          </Panel>
         </ReactFlow>
       </div>
       

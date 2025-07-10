@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAnalyticsSummary, useCourseAnalytics, useTaskAnalytics } from '@/lib/analyticsHooks';
+import { useAnalyticsSummary, useCourseAnalytics, useMindmapAnalytics, useTaskAnalytics } from '@/lib/analyticsHooks';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -13,13 +13,14 @@ export default function AnalyticsPage() {
   const { data: summary, isLoading: summaryLoading } = useAnalyticsSummary();
   const { data: taskAnalytics, isLoading: taskAnalyticsLoading } = useTaskAnalytics(period);
   const { data: courseAnalytics, isLoading: courseAnalyticsLoading } = useCourseAnalytics();
+  const { data: mindmapAnalytics, isLoading: mindmapAnalyticsLoading } = useMindmapAnalytics();
   
   const handlePeriodChange = (value) => {
     setPeriod(value);
   };
   
   // Loading state
-  if (summaryLoading || taskAnalyticsLoading || courseAnalyticsLoading) {
+  if (summaryLoading || taskAnalyticsLoading || courseAnalyticsLoading || mindmapAnalyticsLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Analytics</h1>
@@ -111,6 +112,7 @@ export default function AnalyticsPage() {
         <TabsList className="mb-4">
           <TabsTrigger value="tasks">Task Analytics</TabsTrigger>
           <TabsTrigger value="courses">Course Performance</TabsTrigger>
+          <TabsTrigger value="mindmaps">Mind Maps</TabsTrigger>
         </TabsList>
         
         <TabsContent value="tasks">
@@ -148,7 +150,7 @@ export default function AnalyticsPage() {
               <CardContent className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={taskAnalytics?.timeSeriesData || []}
+                    data={Array.isArray(taskAnalytics?.timeSeriesData) ? taskAnalytics.timeSeriesData : []}
                     margin={{
                       top: 5,
                       right: 30,
@@ -162,7 +164,7 @@ export default function AnalyticsPage() {
                     <Tooltip />
                     <Legend />
                     <Line type="monotone" dataKey="completed" stroke="#8884d8" activeDot={{ r: 8 }} />
-                    <Line type="monotone" dataKey="created" stroke="#82ca9d" />
+                    <Line type="monotone" dataKey="totalTasks" name="Total" stroke="#82ca9d" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -177,12 +179,12 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={[
-                        { name: 'Assignments', value: taskAnalytics?.distributions.type.assignment || 0 },
-                        { name: 'Projects', value: taskAnalytics?.distributions.type.project || 0 },
-                        { name: 'Exams', value: taskAnalytics?.distributions.type.exam || 0 },
-                        { name: 'Other', value: taskAnalytics?.distributions.type.other || 0 }
-                      ]}
+                      data={taskAnalytics?.distributions?.type ? [
+                        { name: 'Assignments', value: taskAnalytics.distributions.type.assignment || 0 },
+                        { name: 'Projects', value: taskAnalytics.distributions.type.project || 0 },
+                        { name: 'Exams', value: taskAnalytics.distributions.type.exam || 0 },
+                        { name: 'Other', value: taskAnalytics.distributions.type.other || 0 }
+                      ] : []}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -354,7 +356,7 @@ export default function AnalyticsPage() {
               <CardContent className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={courseAnalytics || []}
+                    data={Array.isArray(courseAnalytics) ? courseAnalytics : []}
                     margin={{
                       top: 20,
                       right: 30,
@@ -468,6 +470,176 @@ export default function AnalyticsPage() {
               <CardFooter>
                 <Button variant="outline" className="w-full">
                   Download Workload Report
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="mindmaps">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Mindmap Overview */}
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <CardTitle>Mind Maps Overview</CardTitle>
+                <CardDescription>
+                  Mind map usage and complexity analysis
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={Array.isArray(mindmapAnalytics?.mindmapsByCourse) ? 
+                      mindmapAnalytics.mindmapsByCourse.map(item => ({
+                        name: item.courseCode,
+                        mindmaps: item.mindmapsCount,
+                        nodes: item.nodesCount,
+                        avgNodes: Math.round(item.averageNodesPerMap)
+                      })) : []}
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="mindmaps" name="Total Mind Maps" fill="#8884d8" />
+                    <Bar dataKey="avgNodes" name="Avg. Nodes Per Map" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            
+            {/* MindMap Relationships Visualization */}
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <CardTitle>Mind Map Relationships</CardTitle>
+                <CardDescription>Interactive visualization of mind maps and their connections</CardDescription>
+              </CardHeader>
+              <CardContent className="h-96">
+                {mindmapAnalytics?.mindmapsByCourse?.length > 0 ? (
+                  <div className="h-full w-full flex items-center justify-center">
+                    <svg width="100%" height="100%" id="mindmap-relationship-graph"></svg>
+                  </div>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-muted-foreground">
+                    No mind map data available to visualize relationships
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            {/* Node Type Distribution */}
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Node Type Distribution</CardTitle>
+                <CardDescription>Types of nodes used across mind maps</CardDescription>
+              </CardHeader>
+              <CardContent className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={mindmapAnalytics?.nodeTypeDistribution ? Object.entries(mindmapAnalytics.nodeTypeDistribution).map(([name, value]) => ({
+                        name: name.charAt(0).toUpperCase() + name.slice(1),
+                        value
+                      })) : []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {[
+                        { name: 'Course', color: '#8884d8' },
+                        { name: 'Task', color: '#82ca9d' },
+                        { name: 'Resource', color: '#ffc658' },
+                        { name: 'Note', color: '#ff8042' },
+                        { name: 'Custom', color: '#0088FE' }
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            
+            {/* Mind Map Stats */}
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Mind Map Statistics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Total Mind Maps</div>
+                    <div className="text-3xl font-bold">{mindmapAnalytics?.summary?.totalMindmaps || 0}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Course-Related Maps</div>
+                    <div className="text-3xl font-bold">{mindmapAnalytics?.summary?.mindmapsWithCourses || 0}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Average Nodes Per Map</div>
+                    <div className="text-3xl font-bold">{mindmapAnalytics?.summary?.averageNodesPerMap?.toFixed(1) || 0}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Average Connections Per Map</div>
+                    <div className="text-3xl font-bold">{mindmapAnalytics?.summary?.averageEdgesPerMap?.toFixed(1) || 0}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Recent Mind Maps */}
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Recent Mind Maps</CardTitle>
+                <CardDescription>Recently modified mind maps</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mindmapAnalytics?.recentMindmaps?.map((mindmap) => (
+                    <div key={mindmap.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-medium">{mindmap.title}</div>
+                          {mindmap.course && (
+                            <div className="text-xs inline-flex items-center bg-muted rounded-full px-2 py-0.5 mt-1"
+                                style={{ backgroundColor: mindmap.course.color ? `${mindmap.course.color}20` : undefined }}>
+                              {mindmap.course.code}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(mindmap.lastModified).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                        <span>{mindmap.nodeCount} nodes</span>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {(!mindmapAnalytics?.recentMindmaps || mindmapAnalytics.recentMindmaps.length === 0) && (
+                    <p className="text-center text-muted-foreground py-8">
+                      No mind maps available
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full" onClick={() => router.push('/mindmaps')}>
+                  View All Mind Maps
                 </Button>
               </CardFooter>
             </Card>

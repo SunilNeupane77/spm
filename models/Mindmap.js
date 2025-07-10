@@ -16,6 +16,11 @@ const MindmapSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course',
+    required: false
+  },
   nodes: [{
     id: String,
     type: {
@@ -59,7 +64,8 @@ const MindmapSchema = new mongoose.Schema({
   }
 });
 
-// Add index for faster queries
+// Add indexes for faster queries
 MindmapSchema.index({ owner: 1 });
+MindmapSchema.index({ course: 1 });
 
 export default mongoose.models.Mindmap || mongoose.model('Mindmap', MindmapSchema);

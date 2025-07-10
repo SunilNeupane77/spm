@@ -64,17 +64,59 @@ export async function POST(request) {
     
     const data = await request.json();
     
+    // Validate required fields
+    if (!data.title) {
+      return NextResponse.json({ 
+        error: 'Title is required',
+        field: 'title'
+      }, { status: 400 });
+    }
+    
+    if (!data.type || !['document', 'video', 'link', 'book', 'article', 'other'].includes(data.type)) {
+      return NextResponse.json({ 
+        error: 'Valid resource type is required',
+        field: 'type' 
+      }, { status: 400 });
+    }
+    
+    // For link type, URL is required
+    if (data.type === 'link' && !data.url) {
+      return NextResponse.json({ 
+        error: 'URL is required for link resources',
+        field: 'url' 
+      }, { status: 400 });
+    }
+    
     await dbConnect();
     
-    // Create resource
-    const resource = await Resource.create({
-      ...data,
-      owner: session.user.id
-    });
-    
-    return NextResponse.json(resource, { status: 201 });
+    try {
+      // Create resource
+      const resource = await Resource.create({
+        ...data,
+        owner: session.user.id
+      });
+      
+      return NextResponse.json(resource, { status: 201 });
+    } catch (dbError) {
+      // Handle MongoDB validation errors
+      if (dbError.name === 'ValidationError') {
+        const errors = Object.keys(dbError.errors).reduce((acc, key) => {
+          acc[key] = dbError.errors[key].message;
+          return acc;
+        }, {});
+        
+        return NextResponse.json({ 
+          error: 'Validation failed', 
+          details: errors 
+        }, { status: 400 });
+      }
+      throw dbError;
+    }
   } catch (error) {
     console.error('Failed to create resource:', error);
-    return NextResponse.json({ error: 'Failed to create resource' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to create resource',
+      message: error.message 
+    }, { status: 500 });
   }
 }
