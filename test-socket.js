@@ -1,0 +1,1 @@
+console.log('Testing Socket.IO connection'); const io = require('socket.io-client'); const socket = io('http://localhost:3000', {path: '/api/socket'}); socket.on('connect', () => console.log('Connected to server'use client';)); socket.on('connect_error', (err) => console.error('Connection error:', err));
