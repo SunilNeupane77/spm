@@ -20,6 +20,38 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Features
+
+### Resource Management with Cloudinary
+
+This application uses Cloudinary for resource management, allowing users to:
+
+- Upload and store various file types (documents, images, videos, etc.)
+- Optimize media delivery through Cloudinary's CDN
+- Transform images and videos on-the-fly
+- Securely access and share resources
+
+See the [Cloudinary Integration Documentation](./docs/cloudinary-integration.md) for more details.
+
+## Environment Variables
+
+Create a `.env.local` file with the following variables:
+
+```
+# MongoDB
+MONGODB_URI=your_mongodb_connection_string
+
+# NextAuth
+NEXTAUTH_SECRET=your_nextauth_secret
+NEXTAUTH_URL=http://localhost:3000
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
@@ -27,7 +59,10 @@ To learn more about Next.js, take a look at the following resources:
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To learn more about Cloudinary:
+
+- [Cloudinary Documentation](https://cloudinary.com/documentation) - comprehensive guides and API reference
+- [Next-Cloudinary](https://next-cloudinary.spacejelly.dev/) - Next.js components for Cloudinary
 
 ## Deploy on Vercel
 

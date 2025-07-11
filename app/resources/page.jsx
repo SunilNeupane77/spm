@@ -1,5 +1,6 @@
 'use client';
 
+import { CloudinaryResource } from '@/components/CloudinaryImage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,13 +18,13 @@ export default function ResourcesPage() {
   // State for filters
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [filterSubject, setFilterSubject] = useState('');
+  const [filterSubject, setFilterSubject] = useState('all');
   const [filterScope, setFilterScope] = useState('all');
   
   // Fetch resources
   const { data: resources, isLoading, error } = useResources({
     type: filterType !== 'all' ? filterType : undefined,
-    subject: filterSubject || undefined,
+    subject: filterSubject !== 'all' ? filterSubject : undefined,
     isPublic: filterScope === 'public' ? true : undefined,
   });
   
@@ -120,7 +121,7 @@ export default function ResourcesPage() {
               <SelectValue placeholder="All Subjects" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Subjects</SelectItem>
+              <SelectItem value="all">All Subjects</SelectItem>
               {subjects.map(subject => (
                 <SelectItem key={subject} value={subject}>{subject}</SelectItem>
               ))}
@@ -234,6 +235,18 @@ export default function ResourcesPage() {
         </CardHeader>
         
         <CardContent>
+          {/* Display Cloudinary image/resource if available */}
+          {resource.cloudinary && resource.cloudinary.publicId && (
+            <div className="mb-3">
+              <CloudinaryResource 
+                resource={resource} 
+                width={300} 
+                height={150} 
+                className="w-full h-32 object-cover" 
+              />
+            </div>
+          )}
+          
           {resource.description && (
             <p className="text-muted-foreground text-sm line-clamp-2 mb-2">
               {resource.description}

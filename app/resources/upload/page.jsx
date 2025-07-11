@@ -24,7 +24,7 @@ export default function ResourceUploadPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subject, setSubject] = useState('');
-  const [course, setCourse] = useState('');
+  const [course, setCourse] = useState('none');
   const [isPublic, setIsPublic] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
@@ -87,6 +87,12 @@ export default function ResourceUploadPage() {
       const formData = new FormData();
       formData.append('file', selectedFile);
       
+      // Show uploading toast
+      toast({
+        title: 'Uploading file',
+        description: 'Please wait while your file uploads...',
+      });
+      
       // Upload file first
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
@@ -94,21 +100,34 @@ export default function ResourceUploadPage() {
       });
       
       if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file');
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to upload file');
       }
       
       const uploadData = await uploadResponse.json();
       
-      // Determine resource type based on file extension
+      // Determine resource type based on file MIME type and extension
       let type = 'document';
       const fileExt = selectedFile.name.split('.').pop()?.toLowerCase();
       
-      if (fileExt) {
+      // First check MIME type for better accuracy
+      if (selectedFile.type.startsWith('image/')) {
+        type = 'image';
+      } else if (selectedFile.type.startsWith('video/')) {
+        type = 'video';
+      } else if (selectedFile.type === 'application/pdf') {
+        type = 'document';
+      } else if (fileExt) {
+        // Fallback to extension-based detection
         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
           type = 'image';
-        } else if (['mp4', 'webm', 'mov'].includes(fileExt)) {
+        } else if (['mp4', 'webm', 'mov', 'avi'].includes(fileExt)) {
           type = 'video';
-        } else if (['pdf', 'doc', 'docx', 'txt'].includes(fileExt)) {
+        } else if (['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'].includes(fileExt)) {
+          type = 'document';
+        } else if (['xls', 'xlsx', 'csv'].includes(fileExt)) {
+          type = 'document';
+        } else if (['ppt', 'pptx'].includes(fileExt)) {
           type = 'document';
         } else {
           type = 'other';
@@ -124,11 +143,16 @@ export default function ResourceUploadPage() {
         fileUrl: uploadData.url,
         fileType: selectedFile.type,
         fileSize: selectedFile.size,
+        cloudinary: {
+          publicId: uploadData.publicId,
+          resourceType: uploadData.resourceType,
+          format: uploadData.format
+        },
         isPublic
       };
       
-      // Add course if selected
-      if (course) {
+      // Add course if selected and not 'none'
+      if (course && course !== 'none') {
         resourceData.course = course;
       }
       
@@ -151,9 +175,22 @@ export default function ResourceUploadPage() {
         }
       });
     } catch (error) {
+      console.error('Upload error:', error);
+      
+      // Provide more helpful error messages based on common issues
+      let errorMessage = error.message || 'There was an error uploading your file';
+      
+      if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (error.message.includes('size')) {
+        errorMessage = 'File size exceeds the limit. Please upload a smaller file (max 20MB).';
+      } else if (error.message.includes('authentication') || error.message.includes('credentials')) {
+        errorMessage = 'Server configuration error. Please contact the administrator.';
+      }
+      
       toast({
         title: 'Upload failed',
-        description: error.message || 'There was an error uploading your file',
+        description: errorMessage,
         variant: 'destructive',
       });
       setUploading(false);
@@ -285,7 +322,7 @@ export default function ResourceUploadPage() {
                       <SelectValue placeholder="Select a course" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No course</SelectItem>
+                      <SelectItem value="none">No course</SelectItem>
                       {courses?.map(course => (
                         <SelectItem key={course._id} value={course._id}>
                           {course.code ? `${course.code} - ${course.name}` : course.name}

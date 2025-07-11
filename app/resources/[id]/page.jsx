@@ -1,5 +1,6 @@
 'use client';
 
+import { CloudinaryResource } from '@/components/CloudinaryImage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +14,12 @@ import { format } from 'date-fns';
 import { ArrowLeft, Calendar, Download, ExternalLink, FileText, Globe, Loader2, Pencil, Share2, Tag, Trash2, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export default function ResourceDetailPage({ params }) {
-  const resourceId = params.id;
+  // Unwrap the params object using React.use()
+  const unwrappedParams = React.use(params);
+  const resourceId = unwrappedParams.id;
   const router = useRouter();
   const { toast } = useToast();
   
@@ -204,6 +207,18 @@ export default function ResourceDetailPage({ params }) {
             <CardTitle>Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Display resource media with Cloudinary */}
+            {resource.cloudinary && resource.cloudinary.publicId && (
+              <div className="mb-6">
+                <CloudinaryResource 
+                  resource={resource} 
+                  width={800} 
+                  height={400} 
+                  className="w-full rounded-md"
+                />
+              </div>
+            )}
+            
             {resource.subject && (
               <div>
                 <h3 className="font-medium">Subject</h3>
@@ -259,6 +274,27 @@ export default function ResourceDetailPage({ params }) {
                   </Button>
                   {resource.fileType && <span className="text-sm text-muted-foreground">{resource.fileType}</span>}
                   {resource.fileSize && <span className="text-sm text-muted-foreground">({Math.round(resource.fileSize / 1024)} KB)</span>}
+                </div>
+              </div>
+            )}
+            
+            {/* Display download link from Cloudinary if available */}
+            {!resource.fileUrl && resource.cloudinary && resource.cloudinary.publicId && (
+              <div>
+                <h3 className="font-medium">File</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <Button asChild variant="outline" size="sm">
+                    <a 
+                      href={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/raw/upload/${resource.cloudinary.publicId}`} 
+                      download 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download from Cloudinary
+                    </a>
+                  </Button>
+                  {resource.cloudinary.format && <span className="text-sm text-muted-foreground">{resource.cloudinary.format.toUpperCase()}</span>}
                 </div>
               </div>
             )}

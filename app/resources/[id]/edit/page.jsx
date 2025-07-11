@@ -13,10 +13,13 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ExternalLink, Loader2, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 
 export default function EditResourcePage({ params }) {
-  const resourceId = params.id;
+  // Unwrap the params object using React.use()
+  const unwrappedParams = React.use(params);
+  const resourceId = unwrappedParams.id;
   const router = useRouter();
   const { toast } = useToast();
   
@@ -51,7 +54,7 @@ export default function EditResourcePage({ params }) {
         subject: existingResource.subject || '',
         topic: existingResource.topic || '',
         tags: existingResource.tags || [],
-        course: existingResource.course?._id || '',
+        course: existingResource.course?._id || 'none',
         isPublic: existingResource.isPublic || false
       });
     }
@@ -75,6 +78,11 @@ export default function EditResourcePage({ params }) {
     
     // Create a copy of the resource without empty fields
     const resourceData = { ...resource };
+    
+    // Handle 'none' value for course field
+    if (resourceData.course === 'none') {
+      delete resourceData.course;
+    }
     
     // Remove empty fields
     Object.keys(resourceData).forEach(key => {
@@ -345,7 +353,7 @@ export default function EditResourcePage({ params }) {
                     <SelectValue placeholder="Select a course (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No course</SelectItem>
+                    <SelectItem value="none">No course</SelectItem>
                     {courses?.map(course => (
                       <SelectItem key={course._id} value={course._id}>
                         {course.code ? `${course.code} - ${course.name}` : course.name}

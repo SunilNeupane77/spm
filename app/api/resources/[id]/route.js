@@ -107,6 +107,8 @@ export async function PUT(request, { params }) {
   }
 }
 
+import { deleteFromCloudinary } from '@/lib/cloudinary';
+
 // DELETE /api/resources/[id] - Delete a specific resource
 export async function DELETE(request, { params }) {
   try {
@@ -130,6 +132,21 @@ export async function DELETE(request, { params }) {
     }
     
     const deletedResource = { ...resource.toObject() };
+    
+    // Delete from Cloudinary if resource has cloudinary data
+    if (deletedResource.cloudinary && deletedResource.cloudinary.publicId) {
+      try {
+        await deleteFromCloudinary(
+          deletedResource.cloudinary.publicId,
+          deletedResource.cloudinary.resourceType || 'image'
+        );
+        console.log('Deleted from Cloudinary:', deletedResource.cloudinary.publicId);
+      } catch (cloudinaryError) {
+        console.error('Error deleting from Cloudinary:', cloudinaryError);
+        // Continue with deletion even if Cloudinary delete fails
+      }
+    }
+    
     await resource.deleteOne();
     
     return NextResponse.json({ 

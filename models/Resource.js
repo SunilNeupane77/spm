@@ -32,6 +32,20 @@ const ResourceSchema = new mongoose.Schema({
     type: Number, // in bytes
     required: false
   },
+  cloudinary: {
+    publicId: {
+      type: String,
+      required: false
+    },
+    resourceType: {
+      type: String,
+      required: false
+    },
+    format: {
+      type: String,
+      required: false
+    }
+  },
   subject: {
     type: String,
     required: false
