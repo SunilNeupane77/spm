@@ -29,7 +29,6 @@ export default function TasksPage() {
   // Fetch courses for filtering
   const { data: courses, isLoading: coursesLoading } = useCourses();
   
-  // Handle filter changes
   const handleFilterChange = (filterKey, value) => {
     setFilters(prev => ({
       ...prev,
@@ -91,6 +90,7 @@ export default function TasksPage() {
         return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
+  // Render the tasks page
   
   return (
     <div className="container mx-auto px-4 py-8">

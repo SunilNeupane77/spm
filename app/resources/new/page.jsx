@@ -124,7 +124,7 @@ export default function NewResourcePage() {
           Back to Resources
         </Link>
       </Button>
-      
+      // Card for the form
       <Card>
         <CardHeader>
           <CardTitle>Add New Resource</CardTitle>

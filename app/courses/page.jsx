@@ -118,7 +118,7 @@ export default function CoursesPage() {
     }
   });
   
-  // Share course mutation
+  // Share course mutationfm
   const shareCourse = useMutation({
     mutationFn: async ({ courseId, email, permission }) => {
       const response = await fetch(`/api/courses/${courseId}/share`, {

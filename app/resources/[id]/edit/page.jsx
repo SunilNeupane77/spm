@@ -141,7 +141,8 @@ export default function EditResourcePage({ params }) {
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
   };
-  
+  // Render loading state, error, or resource form
+  // If loading, show a spinner
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">

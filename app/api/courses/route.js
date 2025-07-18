@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth/next';
 import { NextResponse } from 'next/server';
 
 // GET /api/courses - Get all courses for the current user
+// 
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);

@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+
 // Form validation schema
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),

@@ -13,12 +13,12 @@ import { ArrowLeft, Save, Share2, Trash2, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 import ReactFlow, {
-    Background,
-    Controls,
-    MiniMap,
-    addEdge,
-    applyEdgeChanges,
-    applyNodeChanges
+  Background,
+  Controls,
+  MiniMap,
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -92,6 +92,7 @@ export default function MindmapDetail({ params }) {
   });
   
   // Share mindmap mutation
+  // This mutation handles sharing the mindmap with another user
   const shareMindmap = useMutation({
     mutationFn: async ({ email, permission }) => {
       const response = await fetch(`/api/mindmaps/${mindmapId}/share`, {
