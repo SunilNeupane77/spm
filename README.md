@@ -1,72 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Student Management System
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)
 
-First, run the development server:
+A comprehensive student management system built with Next.js, React, Node.js, and MongoDB. This application provides functionalities for managing courses, mindmaps, resources, tasks, and user authentication.
+
+## ✨ Features
+
+*   **User Authentication:** Secure registration and login using NextAuth.js.
+*   **Course Management:** Create, view, edit, and share courses.
+*   **Mindmap Creation:** Collaborative mindmap editor with real-time updates.
+*   **Resource Management:** Upload and manage various learning resources.
+*   **Task Tracking:** Organize and track student tasks and deadlines.
+*   **Analytics:** View analytics related to courses and mindmaps.
+*   **Notifications:** Real-time notifications for important updates.
+*   **Cloudinary Integration:** Seamless image and file uploads.
+*   **Socket.IO:** Real-time communication for collaborative features.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+*   Node.js (v18 or higher)
+*   npm or yarn
+*   MongoDB instance (local or cloud-hosted)
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/student.git
+    cd student
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+
+3.  **Environment Variables:**
+    Create a `.env.local` file in the root directory and add the following environment variables:
+
+    ```
+    MONGODB_URI=your_mongodb_connection_string
+    NEXTAUTH_SECRET=your_nextauth_secret
+    NEXTAUTH_URL=http://localhost:3000
+    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+    CLOUDINARY_API_KEY=your_cloudinary_api_key
+    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+    # Add any other necessary environment variables
+    ```
+
+### Running the Development Server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 📂 API Endpoints
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The application exposes various API endpoints for managing data. Here's a brief overview:
 
-## Features
+*   `/api/auth`: User authentication (login, register, session management).
+*   `/api/courses`: CRUD operations for courses.
+*   `/api/mindmaps`: CRUD operations for mindmaps, including collaborative features.
+*   `/api/resources`: CRUD operations for learning resources.
+*   `/api/tasks`: CRUD operations for student tasks.
+*   `/api/analytics`: Endpoints for fetching analytical data.
+*   `/api/upload`: Endpoint for handling file uploads to Cloudinary.
+*   `/api/socket`: Socket.IO integration for real-time features.
 
-### Resource Management with Cloudinary
+## 🧪 Testing
 
-This application uses Cloudinary for resource management, allowing users to:
+The project uses Jest for unit and integration testing.
 
-- Upload and store various file types (documents, images, videos, etc.)
-- Optimize media delivery through Cloudinary's CDN
-- Transform images and videos on-the-fly
-- Securely access and share resources
-
-See the [Cloudinary Integration Documentation](./docs/cloudinary-integration.md) for more details.
-
-## Environment Variables
-
-Create a `.env.local` file with the following variables:
-
-```
-# MongoDB
-MONGODB_URI=your_mongodb_connection_string
-
-# NextAuth
-NEXTAUTH_SECRET=your_nextauth_secret
-NEXTAUTH_URL=http://localhost:3000
-
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+To run all tests:
+```bash
+npm test
+# or
+yarn test
 ```
 
-## Learn More
+To run tests in watch mode:
+```bash
+npm run test:watch
+# or
+yarn test:watch
+```
 
-To learn more about Next.js, take a look at the following resources:
+To generate test coverage reports:
+```bash
+npm run test:coverage
+# or
+yarn test:coverage
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Technologies Used
 
-To learn more about Cloudinary:
+*   **Frontend:**
+    *   Next.js
+    *   React
+    *   Tailwind CSS
+    *   Shadcn/ui
+    *   React Flow (for mindmaps)
+    *   React Query (for data fetching)
+*   **Backend:**
+    *   Node.js
+    *   Express.js (implicitly via Next.js API routes)
+    *   MongoDB (with Mongoose)
+    *   NextAuth.js (for authentication)
+    *   Socket.IO
+    *   Cloudinary SDK
+*   **Testing:**
+    *   Jest
+    *   React Testing Library
 
-- [Cloudinary Documentation](https://cloudinary.com/documentation) - comprehensive guides and API reference
-- [Next-Cloudinary](https://next-cloudinary.spacejelly.dev/) - Next.js components for Cloudinary
+## 🤝 Contributing
 
-## Deploy on Vercel
+Contributions are welcome! Please follow these steps:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature/your-feature-name`).
+3.  Make your changes.
+4.  Commit your changes (`git commit -m 'feat: Add new feature'`).
+5.  Push to the branch (`git push origin feature/your-feature-name`).
+6.  Open a Pull Request.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# spm
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
