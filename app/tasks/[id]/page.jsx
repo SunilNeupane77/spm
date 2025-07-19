@@ -83,6 +83,7 @@ export default function TaskDetailPage({ params }) {
   });
   
   // Delete task mutation
+  // delete
   const deleteTask = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/tasks/${taskId}`, {
