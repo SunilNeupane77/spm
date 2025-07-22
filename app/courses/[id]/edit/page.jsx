@@ -95,6 +95,7 @@ export default function CourseEditPage({ params }) {
   });
   
   // Set initial form data when course is loaded
+  // editing the course data
   useEffect(() => {
     if (course) {
       setCourseData({

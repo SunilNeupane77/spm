@@ -106,7 +106,8 @@ export default function AnalyticsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div>s
+      // Tabs for different analytics sections
       
       <Tabs defaultValue="tasks" className="mb-8">
         <TabsList className="mb-4">
