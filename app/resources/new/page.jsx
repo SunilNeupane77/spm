@@ -91,6 +91,7 @@ export default function NewResourcePage() {
   };
   
   // Add a tag
+  // tag addition logic
   const addTag = () => {
     if (!tagInput.trim()) return;
     

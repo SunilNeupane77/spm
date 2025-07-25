@@ -107,6 +107,7 @@ export default function ResourceUploadPage() {
       const uploadData = await uploadResponse.json();
       
       // Determine resource type based on file MIME type and extension
+      // If no MIME type, use extension
       let type = 'document';
       const fileExt = selectedFile.name.split('.').pop()?.toLowerCase();
       

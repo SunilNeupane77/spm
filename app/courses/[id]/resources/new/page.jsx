@@ -113,6 +113,7 @@ export default function NewResourcePage({ params }) {
       }
       
       // Set the type based on file extension
+      // file extension 
       const extension = file.name.split('.').pop().toLowerCase();
       let type = 'document';
       
