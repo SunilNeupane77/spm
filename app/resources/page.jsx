@@ -153,6 +153,7 @@ export default function ResourcesPage() {
       )}
       
       {/* Error State */}
+      // error handling 
       {error && (
         <div className="text-center p-8 border rounded-lg">
           <p className="text-red-500 mb-4">Error loading resources.</p>
