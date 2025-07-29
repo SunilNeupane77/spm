@@ -43,7 +43,8 @@ export default function CollaboratorsPanel({ connected, activeUsers, owner }) {
             ))}
           </div>
         )}
-      </PopoverContent>
-    </Popover>
-  );
+        )}
+       </PopoverContent>
+     </Popover>
+   );
 }

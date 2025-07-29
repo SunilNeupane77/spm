@@ -14,13 +14,13 @@ import { ArrowLeft, Save, Share2, Trash2, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 import ReactFlow, {
-    Background,
-    Controls,
-    MiniMap,
-    Panel,
-    addEdge,
-    applyEdgeChanges,
-    applyNodeChanges
+  Background,
+  Controls,
+  MiniMap,
+  Panel,
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -65,6 +65,7 @@ export default function CollaborativeMindmapPage({ params }) {
   }, []);
   
   // Real-time collaboration
+  // This hook manages real-time collaboration features like adding, updating, and deleting nodes and edges
   const {
     connected,
     activeUsers,
@@ -227,9 +228,9 @@ export default function CollaborativeMindmapPage({ params }) {
   });
   
   // Delete mindmap mutation
-  const deleteMindmap = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/mindmaps/${mindmapId}`, {
+   const deleteMindmap = useMutation({
+     mutationFn: async () => {
+       const response = await fetch(`/api/mindmaps/${mindmapId}`, {
         method: 'DELETE',
       });
       
